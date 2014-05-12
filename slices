@@ -1,0 +1,84 @@
+#!/usr/bin/python
+from PIL import Image, ImageDraw
+import os
+import ImageFilter
+import sys
+import argparse
+import pprint
+import json
+import math
+
+pp = pprint.PrettyPrinter(indent=4)
+
+class Slices:
+
+	def slice(self, z):
+		for name,obj in self.world["world"].iteritems():
+			self.renderers[obj["type"]](obj, z)
+
+	### Draws sphere
+	def sphere(self,obj, z):
+		if z<obj["center"][2]-obj["radius"] or z>obj["center"][2]+obj["radius"]:
+			return
+		radius=math.sqrt((obj["center"][2]-z*self.world["output"])*(obj["center"][2]-z*self.world["output"])-obj["radius"]*obj["radius"])
+		self.canvas.ellipse([
+				obj["center"][0]-radius,
+				obj["center"][1]-radius,
+				obj["center"][0]+radius,
+				obj["center"][1]+radius
+			]
+			,fill=(0,255,0))
+
+
+	### Draws cylider
+	def cylinder(self,obj, z):
+		if z>obj["center"][2]+obj["heigth"] or z<obj["center"][2]:
+			return
+		self.canvas.ellipse([
+				obj["center"][0]-obj["radius"],
+				obj["center"][1]-obj["radius"],
+				obj["center"][0]+obj["radius"],
+				obj["center"][1]+obj["radius"]
+			]
+			,fill=(255,0,0))
+
+	def scale(self):
+		for k,v in self.world["world"].iteritems():
+			self.world["world"][k]["center"][0] = self.world["world"][k]["center"][0]*self.world["output"]
+			self.world["world"][k]["center"][1] = self.world["world"][k]["center"][1]*self.world["output"]
+			self.world["world"][k]["radius"]    = self.world["world"][k]["radius"]   *self.world["output"]
+
+
+	### Init
+	def __init__(self, input_file="", output_file="", z=0.5):
+		self.renderers = {
+			"sphere":   self.sphere,
+			"cylinder": self.cylinder
+		}
+
+		print("Input file %s" % input_file)
+		print("Output file %s" % output_file)
+		print("Heigth %f" % z)
+
+		self.world = json.load(open(input_file))
+		size = self.world["output"]
+		output_image = Image.new("RGBA",(size,size))
+		self.canvas = ImageDraw.Draw(output_image)
+
+		self.scale()
+		self.slice(z)
+
+		output_image.save(output_file,"PNG")
+		del self.canvas
+
+def main(argv):
+	parser=argparse.ArgumentParser(description="Create a tiger/zebra effect on the input image")
+	parser.add_argument('-i', '--input',  help='the input image',  required=True)
+	parser.add_argument('-o', '--output', help='the output image. Default: out.jpg', default='out.jpg')
+	parser.add_argument('-z', '--z', help='the slice z coordinate. Default: 0.5', default=0.5)
+
+	args=parser.parse_args(argv)
+	Slices(input_file=args.input, output_file=args.output, z=float(args.z))
+
+if __name__ == "__main__":
+	main(sys.argv[1:])
