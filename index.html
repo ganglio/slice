@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Test Slicer</title>
+	<script type="text/javascript">
+	document.addEventListener("DOMContentLoaded",function(){
+		for (i=0; i<=20; i++) {
+			var img = document.createElement("img");
+			img.src='output_'+(20-i)+".png";
+			img.style.webkitTransform="rotateX(60deg) rotateZ(30deg) translateZ("+(-i*20)+"px)";
+			document.body.appendChild(img);
+		}
+	});
+	document.addEventListener('mousemove',function(e){
+		rotate=360*e.clientX/document.body.clientWidth;
+	});
+	</script>
+	<style type="text/css">
+		body {
+			-webkit-perspective: 500px;
+		}
+		img {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			margin-left: -200px;
+			margin-top: -200px;
+			-webkit-transform: rotateX(60deg);
+		}
+	</style>
+</head>
+<body>
+	
+</body>
+</html>

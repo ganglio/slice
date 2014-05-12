@@ -1,33 +1,30 @@
-#!/usr/bin/python
-from PIL import Image, ImageDraw
-import os
-import ImageFilter
+#!/usr/bin/env python
+from PIL import Image
+from PIL import ImageDraw
 import sys
 import argparse
-import pprint
 import json
 import math
-
-pp = pprint.PrettyPrinter(indent=4)
 
 class Slices:
 
 	def slice(self, z):
-		for name,obj in self.world["world"].iteritems():
+		for name,obj in self.world["world"].items():
 			self.renderers[obj["type"]](obj, z)
 
 	### Draws sphere
 	def sphere(self,obj, z):
 		if z<obj["center"][2]-obj["radius"] or z>obj["center"][2]+obj["radius"]:
 			return
-		radius=math.sqrt((obj["center"][2]-z*self.world["output"])*(obj["center"][2]-z*self.world["output"])-obj["radius"]*obj["radius"])
+		squared_radius = obj["radius"]*obj["radius"]-(obj["center"][2]-z)*(obj["center"][2]-z)
+		radius=math.sqrt(math.fabs(squared_radius))
 		self.canvas.ellipse([
-				obj["center"][0]-radius,
-				obj["center"][1]-radius,
-				obj["center"][0]+radius,
-				obj["center"][1]+radius
+				(obj["center"][0]-radius) * self.world["output"],
+				(obj["center"][1]-radius) * self.world["output"],
+				(obj["center"][0]+radius) * self.world["output"],
+				(obj["center"][1]+radius) * self.world["output"]
 			]
-			,fill=(0,255,0))
+			,fill=tuple(obj["color"]))
 
 
 	### Draws cylider
@@ -35,15 +32,15 @@ class Slices:
 		if z>obj["center"][2]+obj["heigth"] or z<obj["center"][2]:
 			return
 		self.canvas.ellipse([
-				obj["center"][0]-obj["radius"],
-				obj["center"][1]-obj["radius"],
-				obj["center"][0]+obj["radius"],
-				obj["center"][1]+obj["radius"]
+				(obj["center"][0]-obj["radius"]) * self.world["output"],
+				(obj["center"][1]-obj["radius"]) * self.world["output"],
+				(obj["center"][0]+obj["radius"]) * self.world["output"],
+				(obj["center"][1]+obj["radius"]) * self.world["output"]
 			]
-			,fill=(255,0,0))
+			,fill=tuple(obj["color"]))
 
 	def scale(self):
-		for k,v in self.world["world"].iteritems():
+		for k,v in self.world["world"].items():
 			self.world["world"][k]["center"][0] = self.world["world"][k]["center"][0]*self.world["output"]
 			self.world["world"][k]["center"][1] = self.world["world"][k]["center"][1]*self.world["output"]
 			self.world["world"][k]["radius"]    = self.world["world"][k]["radius"]   *self.world["output"]
@@ -56,7 +53,7 @@ class Slices:
 			"cylinder": self.cylinder
 		}
 
-		print("Input file %s" % input_file)
+		print("\n\nInput file %s" % input_file)
 		print("Output file %s" % output_file)
 		print("Heigth %f" % z)
 
@@ -65,7 +62,8 @@ class Slices:
 		output_image = Image.new("RGBA",(size,size))
 		self.canvas = ImageDraw.Draw(output_image)
 
-		self.scale()
+		self.canvas.rectangle([0,0,self.world['output']-1,self.world['output']-1], outline=(0,0,0))
+		
 		self.slice(z)
 
 		output_image.save(output_file,"PNG")
