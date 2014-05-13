@@ -26,10 +26,36 @@ class Slices:
 			]
 			,outline=tuple(obj["color"]))
 
+	### Draws cone
+	def cone(self,obj, z):
+		if z<obj["center"][2]-obj["height"]/2 or z>obj["center"][2]+obj["height"]/2:
+			return
+		t=(z-(obj["center"][2]-obj["height"]/2))/obj["height"]
+		radius=obj["radiuses"][1]*t+(1-t)*obj["radiuses"][0]
+		self.canvas.ellipse([
+				(obj["center"][0]-radius) * self.world["output"],
+				(obj["center"][1]-radius) * self.world["output"],
+				(obj["center"][0]+radius) * self.world["output"],
+				(obj["center"][1]+radius) * self.world["output"]
+			]
+			,outline=tuple(obj["color"]))
+
+	### Draws box
+	def box(self,obj, z):
+		if z<obj["center"][2]-obj["sides"][2]/2 or z>obj["center"][2]+obj["sides"][2]/2:
+			return
+		self.canvas.rectangle([
+				(obj["center"][0]-obj["sides"][0]/2) * self.world["output"],
+				(obj["center"][1]-obj["sides"][1]/2) * self.world["output"],
+				(obj["center"][0]+obj["sides"][0]/2) * self.world["output"],
+				(obj["center"][1]+obj["sides"][1]/2) * self.world["output"]
+			]
+			,outline=tuple(obj["color"]))
+
 
 	### Draws cylider
 	def cylinder(self,obj, z):
-		if z>obj["center"][2]+obj["heigth"] or z<obj["center"][2]:
+		if z<obj["center"][2]-obj["height"]/2 or z>obj["center"][2]+obj["height"]/2:
 			return
 		self.canvas.ellipse([
 				(obj["center"][0]-obj["radius"]) * self.world["output"],
@@ -50,11 +76,11 @@ class Slices:
 	def __init__(self, input_file="", output_file="", z=0.5):
 		self.renderers = {
 			"sphere":   self.sphere,
-			"cylinder": self.cylinder
+			"cylinder": self.cylinder,
+			"box":      self.box,
+			"cone":     self.cone
 		}
 
-		print("\n\nInput file %s" % input_file)
-		print("Output file %s" % output_file)
 		print("Heigth %f" % z)
 
 		self.world = json.load(open(input_file))
@@ -62,8 +88,10 @@ class Slices:
 		output_image = Image.new("RGBA",(size,size))
 		self.canvas = ImageDraw.Draw(output_image)
 
-		if (z==0):
+		if (z==0 or z==1):
 			self.canvas.rectangle([0,0,self.world['output']-1,self.world['output']-1], outline=(0,0,0))
+
+		self.canvas.text((2,2),"%0.2f" % z, fill=(0,0,0))
 		
 		self.slice(z)
 

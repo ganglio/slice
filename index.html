@@ -5,6 +5,8 @@
 	<title>Test Slicer</title>
 	<script type="text/javascript">
 	var maxImages = 100;
+	var isMouseDown = false;
+	var currentPos = [0,0];
 	document.addEventListener("DOMContentLoaded",function(){
 		for (i=0; i<=maxImages; i++) {
 			var img = document.createElement("img");
@@ -12,13 +14,22 @@
 			document.querySelector("#container").appendChild(img);
 		}
 	});
+	document.addEventListener('mousedown',function(e){
+		isMouseDown = true;
+		//currentPos = [e.clientX,e.clientY]
+	});
+	document.addEventListener('mouseup',function(e){
+		isMouseDown = false;
+	});
 	document.addEventListener('mousemove',function(e){
-		var rotateZ=360*e.clientX/document.body.clientWidth;
-		var rotateX=360*e.clientY/document.body.clientHeight;
-		[].slice.call(document.querySelectorAll('#container img'))
-			.map(function(e,i){
-				e.style.webkitTransform="rotateX("+rotateX+"deg) rotateZ("+rotateZ+"deg) translateZ("+(200-i*(400/maxImages))+"px)";
-			});
+		if (isMouseDown) {
+			var rotateZ=360*(e.clientX-currentPos[0])/document.body.clientWidth;
+			var rotateX=360*(e.clientY-currentPos[1])/document.body.clientHeight;
+			[].slice.call(document.querySelectorAll('#container img'))
+				.map(function(e,i){
+					e.style.webkitTransform="rotateX("+rotateX+"deg) rotateZ("+rotateZ+"deg) translateZ("+(200-i*(400/maxImages))+"px)";
+				});
+		}
 	});
 	</script>
 	<style type="text/css">
@@ -36,7 +47,7 @@
 			height: 100%;
 			-webkit-perspective: 500px;
 		}
-		img {
+		#container img {
 			position: absolute;
 			top:50%;
 			left:50%;
