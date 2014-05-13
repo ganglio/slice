@@ -4,33 +4,48 @@
 	<meta charset="UTF-8">
 	<title>Test Slicer</title>
 	<script type="text/javascript">
+	var maxImages = 100;
 	document.addEventListener("DOMContentLoaded",function(){
-		for (i=0; i<=20; i++) {
+		for (i=0; i<=maxImages; i++) {
 			var img = document.createElement("img");
-			img.src='output_'+(20-i)+".png";
-			img.style.webkitTransform="rotateX(60deg) rotateZ(30deg) translateZ("+(-i*20)+"px)";
-			document.body.appendChild(img);
+			img.src='output_'+(maxImages-i)+".png";
+			document.querySelector("#container").appendChild(img);
 		}
 	});
 	document.addEventListener('mousemove',function(e){
-		rotate=360*e.clientX/document.body.clientWidth;
+		var rotateZ=360*e.clientX/document.body.clientWidth;
+		var rotateX=360*e.clientY/document.body.clientHeight;
+		[].slice.call(document.querySelectorAll('#container img'))
+			.map(function(e,i){
+				e.style.webkitTransform="rotateX("+rotateX+"deg) rotateZ("+rotateZ+"deg) translateZ("+(200-i*(400/maxImages))+"px)";
+			});
 	});
 	</script>
 	<style type="text/css">
+		html {
+			height: 100%;
+		}
 		body {
+			height: 100%;
+			margin:0;
+			padding:0;
+		}
+		#container {
+			position: relative;
+			width: 100%;
+			height: 100%;
 			-webkit-perspective: 500px;
 		}
 		img {
 			position: absolute;
-			top: 50%;
-			left: 50%;
+			top:50%;
+			left:50%;
 			margin-left: -200px;
-			margin-top: -200px;
-			-webkit-transform: rotateX(60deg);
+			margin-top:-200px;
 		}
 	</style>
 </head>
 <body>
-	
+	<div id="container"></div>
 </body>
 </html>

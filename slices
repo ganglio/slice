@@ -24,7 +24,7 @@ class Slices:
 				(obj["center"][0]+radius) * self.world["output"],
 				(obj["center"][1]+radius) * self.world["output"]
 			]
-			,fill=tuple(obj["color"]))
+			,outline=tuple(obj["color"]))
 
 
 	### Draws cylider
@@ -37,7 +37,7 @@ class Slices:
 				(obj["center"][0]+obj["radius"]) * self.world["output"],
 				(obj["center"][1]+obj["radius"]) * self.world["output"]
 			]
-			,fill=tuple(obj["color"]))
+			,outline=tuple(obj["color"]))
 
 	def scale(self):
 		for k,v in self.world["world"].items():
@@ -62,7 +62,8 @@ class Slices:
 		output_image = Image.new("RGBA",(size,size))
 		self.canvas = ImageDraw.Draw(output_image)
 
-		self.canvas.rectangle([0,0,self.world['output']-1,self.world['output']-1], outline=(0,0,0))
+		if (z==0):
+			self.canvas.rectangle([0,0,self.world['output']-1,self.world['output']-1], outline=(0,0,0))
 		
 		self.slice(z)
 
